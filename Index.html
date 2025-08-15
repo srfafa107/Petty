@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ผู้ช่วยขายสินค้าสัตว์เลี้ยง | Pet Shop Assistant</title>
+  <meta name="description" content="เว็บผู้ช่วยขายสินค้าสำหรับสัตว์เลี้ยง ค้นหา กรองสินค้า แชทแนะนำ และตะกร้าสินค้าในไฟล์เดียว" />
+  <style>
+    :root{
+      --bg:#0f172a;          /* slate-900 */
+      --panel:#111827;       /* gray-900 */
+      --muted:#1f2937;       /* gray-800 */
+      --card:#0b1224;        /* deep */
+      --text:#e5e7eb;        /* gray-200 */
+      --text-dim:#cbd5e1;    /* slate-300 */
+      --brand:#22c55e;       /* green-500 */
+      --brand-2:#06b6d4;     /* cyan-500 */
+      --accent:#f59e0b;      /* amber-500 */
+      --danger:#ef4444;      /* red-500 */
+      --ring: 0 0 0 3px rgba(34,197,94,.35);
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:linear-gradient(180deg,#0b1224,#0e1630 40%,#0f172a);
+      color:var(--text); font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", "Noto Sans", sans-serif;
+    }
+    a{color:inherit}
+    .container{max-width:1200px;margin:auto;padding:20px}
+    header{
+      position:sticky;top:0;z-index:10;
+      background:rgba(15,23,42,.75);backdrop-filter:blur(8px);
+      border-bottom:1px solid #1f2937;
+    }
+    .header-inner{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 20px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700}
+    .logo-badge{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:var(--shadow)}
+    .logo-badge span{font-size:20px}
+    .quick-actions{display:flex;gap:8px}
+    button, .btn{
+      appearance:none;border:0;cursor:pointer;
+      background:linear-gradient(180deg, #1e293b, #0b1224);
+      color:var(--text); padding:10px 14px;border-radius:12px;
+      box-shadow:0 4px 18px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+      transition:.18s transform ease,.18s box-shadow ease,.18s background ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    button:focus{outline:none; box-shadow: var(--shadow), var(--ring)}
+    .btn-primary{background:linear-gradient(180deg,var(--brand),#15803d); color:#04210f; font-weight:700}
+    .btn-danger{background:linear-gradient(180deg,#ef4444,#7f1d1d); color:#fff}
+    .layout{
+      display:grid; gap:20px; grid-template-columns: 280px 1fr 360px;
+      align-items:start; padding:20px;
+    }
+    @media (max-width: 1100px){
+      .layout{grid-template-columns: 1fr; padding:16px}
+      .aside-right{order:3}
+    }
+    .panel{
+      background:linear-gradient(180deg,var(--panel),#0b1224);
+      border:1px solid #1f2937;border-radius:var(--radius);box-shadow:var(--shadow)
+    }
+    .panel .head{padding:14px 16px;border-bottom:1px solid #1f2937;display:flex;justify-content:space-between;align-items:center}
+    .panel .body{padding:14px 16px}
+    .filters .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .chip{
+      padding:8px 12px;border-radius:999px;background:#0b1224;border:1px solid #1f2937;cursor:pointer;user-select:none
+    }
+    .chip.active{background:linear-gradient(180deg,#1f2937,#0b1224);border-color:#334155}
+    .input, select{
+      width:100%; padding:12px 12px;border-radius:12px;border:1px solid #1f2937;background:#0b1224;color:var(--text)
+    }
+    .input::placeholder{color:#94a3b8}
+    .range-wrap{display:flex;gap:10px;align-items:center}
+    .range-wrap input[type="number"]{width:100%}
+    .product-grid{
+      display:grid; gap:14px;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+    @media (max-width: 900px){ .product-grid{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    @media (max-width: 560px){ .product-grid{grid-template-columns: 1fr;} }
+    .card{
+      background:linear-gradient(180deg,#0b1224,#0a1020);
+      border:1px solid #1f2937;border-radius:16px;overflow:hidden;display:flex;flex-direction:column
+    }
+    .thumb{
+      height:150px; display:grid; place-items:center;
+      background:radial-gradient(80% 80% at 50% 30%, #0f1c3c, #070b16);
+      border-bottom:1px solid #1f2937;
+      font-size:50px
+    }
+    .card .content{padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+    .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid #1f2937;background:#0b1224;width:max-content}
+    .price{font-weight:800;font-size:18px}
+    .muted{color:var(--text-dim);font-size:13px}
+    .card .actions{margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .qty{display:flex;align-items:center;gap:6px}
+    .qty button{width:28px;height:28px;padding:0;display:grid;place-items:center}
+    .aside-right{position:sticky; top:86px}
+    .cart-items{display:flex;flex-direction:column; gap:10px; max-height:380px; overflow:auto}
+    .cart-item{display:grid;grid-template-columns: 44px 1fr auto; gap:10px; align-items:center; padding:8px;border:1px solid #1f2937;border-radius:12px; background:#0b1224}
+    .cart-item .ico{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;background:#0e152a;font-size:22px}
+    .subtotal{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px dashed #334155}
+    .checkout{display:flex;gap:8px; margin-top:10px}
+    .empty{color:#94a3b8;text-align:center;padding:14px}
+    /* Chat Assistant */
+    .chat-wrap{height:480px;display:flex;flex-direction:column}
+    .messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:10px}
+    .bubble{max-width:85%;padding:10px 12px;border-radius:14px;line-height:1.4; box-shadow:var(--shadow)}
+    .bot{align-self:flex-start;background:#0e152a;border:1px solid #1f2937}
+    .user{align-self:flex-end;background:linear-gradient(180deg,#1e293b,#0b1224);border:1px solid #1f2937}
+    .composer{display:flex;gap:8px;padding:10px;border-top:1px solid #1f2937}
+    .composer input{flex:1}
+    .suggest{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-top:1px dashed #334155}
+    .suggest .chip{background:#0e152a}
+    .small{font-size:12px;color:#94a3b8}
+    .sr-only{position:absolute;left:-9999px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo" aria-label="โลโก้ร้านค้าสัตว์เลี้ยง">
+        <div class="logo-badge" aria-hidden="true"><span>🐾</span></div>
+        <div>
+          <div>Pet Shop Assistant</div>
+          <div class="small">ผู้ช่วยขายสินค้าสำหรับสัตว์เลี้ยง</div>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <button id="resetFiltersBtn" title="ล้างตัวกรอง">ล้างตัวกรอง</button>
+        <button id="clearCartTop" class="btn-danger" title="ล้างตะกร้า">ล้างตะกร้า</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <!-- Left: Filters -->
+      <aside class="panel filters" aria-label="ตัวกรองสินค้า">
+        <div class="head"><strong>ค้นหา & ตัวกรอง</strong></div>
+        <div class="body">
+          <label class="sr-only" for="search">ค้นหา</label>
+          <input id="search" class="input" placeholder="ค้นหาชื่อสินค้า, คำสำคัญ เช่น 'ขนล่วง', 'ลูกสุนัข'…" />
+          <div class="row">
+            <div class="badge">ชนิดสัตว์เลี้ยง</div>
+            <div id="petTypeChips" class="row"></div>
+          </div>
+          <div class="row">
+            <div class="badge">หมวดหมู่</div>
+            <div id="categoryChips" class="row"></div>
+          </div>
+          <div class="row">
+            <div class="badge">ช่วงราคา (฿)</div>
+            <div class="range-wrap">
+              <input id="minPrice" type="number" class="input" min="0" step="10" placeholder="ต่ำสุด">
+              <span>—</span>
+              <input id="maxPrice" type="number" class="input" min="0" step="10" placeholder="สูงสุด">
+            </div>
+          </div>
+          <div class="row">
+            <label class="badge" for="sortBy">เรียงตาม</label>
+            <select id="sortBy">
+              <option value="featured">แนะนำ</option>
+              <option value="priceAsc">ราคาต่ำ→สูง</option>
+              <option value="priceDesc">ราคาสูง→ต่ำ</option>
+              <option value="rating">เรตติ้ง</option>
+            </select>
+          </div>
+          <div class="row">
+            <button id="applyFilters" class="btn-primary" aria-label="ใช้ตัวกรอง">ใช้ตัวกรอง</button>
+          </div>
+          <div class="small">เคล็ดลับ: พิมพ์ “แพ้ไก่”, “ลดกลิ่น”, “ทำความสะอาดหู” เพื่อค้นหาแบบฉลาด</div>
+        </div>
+      </aside>
+
+      <!-- Middle: Products -->
+      <section class="panel" aria-label="รายการสินค้า">
+        <div class="head">
+          <strong>สินค้า</strong>
+          <div class="small"><span id="countLabel">0</span> รายการ</div>
+        </div>
+        <div class="body">
+          <div id="productGrid" class="product-grid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Right: Cart & Chat -->
+      <aside class="aside-right">
+        <!-- Cart -->
+        <section class="panel" aria-label="ตะกร้าสินค้า">
+          <div class="head"><strong>ตะกร้า</strong><span class="small" id="cartCount">(0)</span></div>
+          <div class="body">
+            <div id="cartItems" class="cart-items"></div>
+            <div class="subtotal">
+              <div>ยอดรวม</div>
+              <div><strong id="subtotal">฿0</strong></div>
+            </div>
+            <div class="checkout">
+              <button id="checkoutBtn" class="btn-primary">สรุปคำสั่งซื้อ</button>
+              <button id="clearCart" class="btn-danger">ล้างตะกร้า</button>
+            </div>
+            <div class="small">ตะกร้าจะถูกบันทึกอัตโนมัติในอุปกรณ์นี้</div>
+          </div>
+        </section>
+
+        <!-- Chat Assistant -->
+        <section class="panel" aria-label="ผู้ช่วยแชท">
+          <div class="head"><strong>ผู้ช่วยแนะนำสินค้า 🤖</strong></div>
+          <div class="body chat-wrap">
+            <div id="messages" class="messages" aria-live="polite"></div>
+            <div class="suggest">
+              <div class="chip" data-prompt="แนะนำอาหารสำหรับลูกสุนัขงบ 500">ลูกสุนัข งบ 500</div>
+              <div class="chip" data-prompt="แมวขนยาว ขนล่วงเยอะ ใช้อะไรดี">ขนล่วงแมว</div>
+              <div class="chip" data-prompt="แมวแพ้ไก่ ขออาหารโปรตีนทางเลือก">แพ้ไก่</div>
+              <div class="chip" data-prompt="ทำความสะอาดฟันสุนัข ลดกลิ่นปาก">ฟันสุนัข</div>
+            </div>
+            <div class="composer">
+              <input id="chatInput" class="input" placeholder="พิมพ์ถามผู้ช่วย เช่น “แมวแพ้ไก่ควรกินอะไรดี งบไม่เกิน 400”">
+              <button id="sendBtn" class="btn-primary">ส่ง</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <template id="cardTpl">
+    <article class="card" role="article">
+      <div class="thumb" aria-hidden="true"></div>
+      <div class="content">
+        <div class="badge"></div>
+        <div class="title" style="font-weight:700"></div>
+        <div class="muted desc"></div>
+        <div class="muted">เหมาะกับ: <span class="fit"></span></div>
+        <div class="price"></div>
+        <div class="muted">⭐ <span class="rating"></span> | ส่งภายใน 2–3 วัน</div>
+        <div class="actions">
+          <div class="qty">
+            <button class="dec" aria-label="ลดจำนวน">−</button>
+            <span class="qv">1</span>
+            <button class="inc" aria-label="เพิ่มจำนวน">＋</button>
+          </div>
+          <button class="add btn-primary">เพิ่มลงตะกร้า</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    /***************
+     * Mock Catalog
+     ***************/
+    const PRODUCTS = [
+      {id:'FDK-001', name:'อาหารเม็ดลูกสุนัข สูตรย่อยง่าย', emoji:'🦴', pet:'สุนัข', category:'อาหาร', price:329, rating:4.6,
+       tags:['ลูกสุนัข','ย่อยง่าย','ไก่','โอเมก้า-3'], fit:'ลูกสุนัขอายุ 2–12 เดือน', desc:'โปรตีนคุณภาพ จากไก่ + พรีไบโอติก'},
+      {id:'FDC-002', name:'อาหารแมวแพ้ง่าย สูตรปลาทูน่า', emoji:'🐟', pet:'แมว', category:'อาหาร', price:389, rating:4.7,
+       tags:['แพ้ไก่','ขนสวย','ย่อยง่าย','ปลา'], fit:'แมวโตทั่วไป', desc:'โปรตีนจากปลาทูน่า ลดการแพ้ไก่'},
+      {id:'TRT-003', name:'ขนมสุนัข เดนทัลชิว ลดกลิ่นปาก', emoji:'🪥', pet:'สุนัข', category:'ของกินเล่น', price:149, rating:4.5,
+       tags:['ฟัน','กลิ่นปาก','เดนทัล'], fit:'สุนัขทุกวัย', desc:'เคี้ยวเพลิน ลดคราบหินปูน'},
+      {id:'TOY-004', name:'ของเล่นแมว ไม้ล่อขนนก', emoji:'🪶', pet:'แมว', category:'ของเล่น', price:89, rating:4.4,
+       tags:['ออกกำลังกาย','ของเล่น','แมวพลังงานสูง'], fit:'แมวทุกวัย', desc:'ขนนกเด้งไว กระตุ้นสัญชาตญาณ'},
+      {id:'GRM-005', name:'แปรงกำจัดขนร่วง แมวขนยาว', emoji:'🧤', pet:'แมว', category:'อุปกรณ์', price:219, rating:4.8,
+       tags:['ขนล่วง','ขนยาว','กรูมมิ่ง'], fit:'แมวขนยาว/หนา', desc:'ดึงขนชั้นใต้ ลดก้อนขน'},
+      {id:'BTH-006', name:'แชมพูสุนัข ผิวแพ้ง่าย Oat', emoji:'🫧', pet:'สุนัข', category:'อุปกรณ์', price:259, rating:4.6,
+       tags:['ผิวแพ้ง่าย','โอ๊ตมีล','ลดคัน'], fit:'สุนัขผิวแพ้ง่าย', desc:'สูตรอ่อนโยน pH-balanced'},
+      {id:'SAN-007', name:'ทรายแมวจับตัวแน่น กลิ่นลาเวนเดอร์', emoji:'🪨', pet:'แมว', category:'อุปกรณ์', price:179, rating:4.3,
+       tags:['ดูดซับกลิ่น','จับตัวแน่น','ลาเวนเดอร์'], fit:'แมวทุกวัย', desc:'เก็บกลิ่นดี ฝุ่นต่ำ'},
+      {id:'BWL-008', name:'ชามสแตนเลสกันล้ม 1 ลิตร', emoji:'🥣', pet:'สุนัข', category:'อุปกรณ์', price:129, rating:4.4,
+       tags:['กันลื่น','สเตนเลส','ทนทาน'], fit:'สุนัขพันธุ์กลาง', desc:'ฐานยางกันลื่น ล้างง่าย'},
+      {id:'SUP-009', name:'เจลปลาทูน่า บำรุงขนและผิว', emoji:'✨', pet:'แมว', category:'อาหารเสริม', price:199, rating:4.5,
+       tags:['ขนเงา','โอเมก้า','วิตามิน'], fit:'แมวโต', desc:'โอเมก้า 3-6-9 ช่วยผิวสุขภาพดี'},
+      {id:'TRT-010', name:'ขนมแมวเลีย สูตรคอนซูเม่', emoji:'🍮', pet:'แมว', category:'ของกินเล่น', price:99, rating:4.7,
+       tags:['ขนมเลีย','ทานเล่น','ให้ยา'], fit:'แมวเลือกกิน', desc:'หอม อร่อย ช่วยซ่อนยา'}
+    ];
+
+    const PET_TYPES = ['ทั้งหมด','สุนัข','แมว'];
+    const CATEGORIES = ['ทั้งหมด','อาหาร','ของกินเล่น','ของเล่น','อุปกรณ์','อาหารเสริม'];
+
+    /***************
+     * State
+     ***************/
+    const state = {
+      search:'',
+      petType:'ทั้งหมด',
+      category:'ทั้งหมด',
+      minPrice:null,
+      maxPrice:null,
+      sort:'featured',
+      qtyMap:{}, // id -> qty (card UI)
+      cart: JSON.parse(localStorage.getItem('pet_cart')||'[]')
+    };
+
+    /***************
+     * DOM Helpers
+     ***************/
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    function baht(n){ return '฿' + n.toLocaleString('th-TH'); }
+
+    function saveCart(){
+      localStorage.setItem('pet_cart', JSON.stringify(state.cart));
+      renderCart();
+    }
+
+    /***************
+     * Filters UI
+     ***************/
+    function renderChips(){
+      const petWrap = $('#petTypeChips');
+      petWrap.innerHTML='';
+      PET_TYPES.forEach(p=>{
+        const el = document.createElement('div');
+        el.className='chip'+(state.petType===p?' active':'');
+        el.textContent=p;
+        el.role='button'; el.tabIndex=0;
+        el.addEventListener('click',()=>{ state.petType=p; renderChips(); renderProducts(); });
+        petWrap.appendChild(el);
+      });
+
+      const catWrap = $('#categoryChips');
+      catWrap.innerHTML='';
+      CATEGORIES.forEach(c=>{
+        const el = document.createElement('div');
+        el.className='chip'+(state.category===c?' active':'');
+        el.textContent=c;
+        el.addEventListener('click',()=>{ state.category=c; renderChips(); renderProducts(); });
+        catWrap.appendChild(el);
+      });
+    }
+
+    /***************
+     * Product List
+     ***************/
+    function filterProducts(){
+      const q = state.search.trim().toLowerCase();
+      let list = PRODUCTS.filter(p=>{
+        const inPet = state.petType==='ทั้งหมด' || p.pet===state.petType;
+        const inCat = state.category==='ทั้งหมด' || p.category===state.category;
+        const inPrice = (state.minPrice==null || p.price>=state.minPrice) &&
+                        (state.maxPrice==null || p.price<=state.maxPrice);
+        const inText = !q || [p.name,p.desc,p.fit,...p.tags].join(' ').toLowerCase().includes(q);
+        return inPet && inCat && inPrice && inText;
+      });
+
+      switch(state.sort){
+        case 'priceAsc': list.sort((a,b)=>a.price-b.price); break;
+        case 'priceDesc': list.sort((a,b)=>b.price-a.price); break;
+        case 'rating': list.sort((a,b)=>b.rating-a.rating); break;
+        default: list.sort((a,b)=>b.rating - a.rating/10 - a.price/10000); // pseudo-featured
+      }
+      return list;
+    }
+
+    function renderProducts(){
+      const grid = $('#productGrid');
+      grid.innerHTML='';
+      const list = filterProducts();
+      $('#countLabel').textContent = list.length;
+      list.forEach(p=>{
+        const tpl = document.getElementById('cardTpl').content.cloneNode(true);
+        const card = tpl.querySelector('.card');
+        tpl.querySelector('.thumb').textContent = p.emoji;
+        tpl.querySelector('.badge').textContent = `${p.pet} • ${p.category}`;
+        tpl.querySelector('.title').textContent = p.name;
+        tpl.querySelector('.desc').textContent = p.desc;
+        tpl.querySelector('.fit').textContent = p.fit;
+        tpl.querySelector('.price').textContent = baht(p.price);
+        tpl.querySelector('.rating').textContent = `${p.rating.toFixed(1)}`;
+
+        const qv = tpl.querySelector('.qv');
+        const inc = tpl.querySelector('.inc');
+        const dec = tpl.querySelector('.dec');
+        const add = tpl.querySelector('.add');
+
+        let q = state.qtyMap[p.id] || 1;
+        qv.textContent = q;
+
+        inc.addEventListener('click',()=>{ q=Math.min(99,q+1); state.qtyMap[p.id]=q; qv.textContent=q; });
+        dec.addEventListener('click',()=>{ q=Math.max(1,q-1); state.qtyMap[p.id]=q; qv.textContent=q; });
+
+        add.addEventListener('click',()=>{
+          const exist = state.cart.find(it=>it.id===p.id);
+          if(exist) exist.qty = Math.min(99, exist.qty + q);
+          else state.cart.push({id:p.id, name:p.name, emoji:p.emoji, price:p.price, qty:q});
+          saveCart();
+          animateAdd(card);
+        });
+
+        grid.appendChild(tpl);
+      });
+
+      if(list.length===0){
+        grid.innerHTML = `<div class="empty">ไม่พบสินค้าที่ตรงกับการค้นหา ลองล้างตัวกรองหรือใช้คำค้นอื่น ๆ</div>`;
+      }
+    }
+
+    function animateAdd(el){
+      el.style.transform='scale(0.98)';
+      el.style.transition='.12s';
+      setTimeout(()=>{ el.style.transform=''; }, 150);
+    }
+
+    /***************
+     * Cart
+     ***************/
+    function renderCart(){
+      const wrap = $('#cartItems');
+      wrap.innerHTML='';
+      if(state.cart.length===0){
+        wrap.innerHTML = `<div class="empty">ตะกร้าว่างเปล่า 🛒</div>`;
+      }
+      let sum = 0;
+      state.cart.forEach((it,i)=>{
+        sum += it.price*it.qty;
+        const row = document.createElement('div');
+        row.className='cart-item';
+        row.innerHTML = `
+          <div class="ico" aria-hidden="true">${it.emoji}</div>
+          <div>
+            <div style="font-weight:700">${it.name}</div>
+            <div class="small">จำนวน x${it.qty} • ${baht(it.price)}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button aria-label="ลดจำนวน" data-i="${i}" data-act="dec">−</button>
+            <button aria-label="เพิ่มจำนวน" data-i="${i}" data-act="inc">＋</button>
+            <button class="btn-danger" aria-label="ลบสินค้า" data-i="${i}" data-act="del">ลบ</button>
+          </div>`;
+        row.addEventListener('click', e=>{
+          const btn = e.target.closest('button'); if(!btn) return;
+          const idx = +btn.dataset.i, act = btn.dataset.act;
+          const item = state.cart[idx];
+          if(act==='dec'){ item.qty = Math.max(1, item.qty-1); }
+          if(act==='inc'){ item.qty = Math.min(99, item.qty+1); }
+          if(act==='del'){ state.cart.splice(idx,1); }
+          saveCart();
+        });
+        wrap.appendChild(row);
+      });
+      $('#subtotal').textContent = baht(sum);
+      $('#cartCount').textContent = `(${state.cart.reduce((a,b)=>a+b.qty,0)})`;
+    }
+
+    function clearCart(){ state.cart = []; saveCart(); }
+
+    /***************
+     * Chat Assistant (Rule-based)
+     ***************/
+    const messages = $('#messages');
+
+    function botSay(text, options={}){
+      const b = document.createElement('div');
+      b.className='bubble bot';
+      b.innerHTML = text;
+      messages.appendChild(b);
+      messages.scrollTop = messages.scrollHeight;
+      if(options.attachProducts) renderSuggestProducts(options.attachProducts);
+    }
+
+    function userSay(text){
+      const u = document.createElement('div');
+      u.className='bubble user';
+      u.textContent = text;
+      messages.appendChild(u);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function renderSuggestProducts(list){
+      const wrap = document.createElement('div');
+      wrap.style.marginTop='8px';
+      wrap.innerHTML = `<div class="small">สินค้าแนะนำ:</div>`;
+      list.slice(0,3).forEach(p=>{
+        const row = document.createElement('div');
+        row.className='small';
+        row.style.marginTop='4px';
+        row.innerHTML = `• ${p.emoji} <strong>${p.name}</strong> — ${baht(p.price)} 
+          <button class="btn" data-id="${p.id}" style="margin-left:6px">เพิ่มลงตะกร้า</button>`;
+        row.querySelector('button').addEventListener('click',()=>{
+          const exist = state.cart.find(it=>it.id===p.id);
+          if(exist) exist.qty = Math.min(99, exist.qty + 1);
+          else state.cart.push({id:p.id, name:p.name, emoji:p.emoji, price:p.price, qty:1});
+          saveCart();
+        });
+        wrap.appendChild(row);
+      });
+      const host = document.createElement('div');
+      host.className='bubble bot';
+      host.appendChild(wrap);
+      messages.appendChild(host);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function scoreProduct(p, ctx){
+      let s = 0;
+      if(ctx.pet && p.pet===ctx.pet) s += 3;
+      if(ctx.category && p.category===ctx.category) s += 2;
+      if(ctx.maxPrice && p.price<=ctx.maxPrice) s += 2;
+      if(ctx.minPrice && p.price>=ctx.minPrice) s += 1;
+      ctx.keywords.forEach(k=>{
+        if((p.name+p.desc+p.fit+p.tags.join(' ')).toLowerCase().includes(k)) s += 1.2;
+      });
+      return s + p.rating/2; // bias to rating
+    }
+
+    function parseContext(text){
+      text = text.toLowerCase();
+      const ctx = {pet:null, category:null, minPrice:null, maxPrice:null, keywords:[]};
+
+      if(/สุนัข|หมา/.test(text)) ctx.pet='สุนัข';
+      if(/แมว/.test(text)) ctx.pet='แมว';
+
+      if(/อาหารเสริม/.test(text)) ctx.category='อาหารเสริม';
+      else if(/ของเล่น/.test(text)) ctx.category='ของเล่น';
+      else if(/อุปกรณ์|กรูม|แชมพู|แปรง|ทราย/.test(text)) ctx.category='อุปกรณ์';
+      else if(/ของกินเล่น|ขนม|เดนทัล/.test(text)) ctx.category='ของกินเล่น';
+      else if(/อาหาร|เม็ด|สูตร/.test(text)) ctx.category='อาหาร';
+
+      // ราคา: …งบ 500 / ไม่เกิน 400 / 200-300
+      const m1 = text.match(/งบ\s*(\d{2,5})/);
+      const m2 = text.match(/ไม่เกิน\s*(\d{2,5})/);
+      const m3 = text.match(/(\d{2,5})\s*[-–]\s*(\d{2,5})/);
+      if(m1) ctx.maxPrice = +m1[1];
+      if(m2) ctx.maxPrice = +m2[1];
+      if(m3){ ctx.minPrice=+m3[1]; ctx.maxPrice=+m3[2]; }
+
+      // คีย์เวิร์ดอาการ/คุณสมบัติ
+      const dict = ['แพ้ไก่','ผิวแพ้ง่าย','ขนล่วง','กลิ่นปาก','ลดกลิ่น','ขนยาว','ย่อยง่าย','ลูกสุนัข','ลูกแมว'];
+      dict.forEach(k=>{
+        if(text.includes(k)) ctx.keywords.push(k.toLowerCase());
+      });
+
+      // คำถามทั่วไป
+      if(/โปรโม|ส่วนลด/.test(text)) ctx.faq='promo';
+      if(/ส่ง|จัดส่ง|กี่วัน/.test(text)) ctx.faq='ship';
+      if(/คืน|เคลม|รับประกัน/.test(text)) ctx.faq='return';
+
+      return ctx;
+    }
+
+    function reply(text){
+      const ctx = parseContext(text);
+
+      if(ctx.faq==='promo'){
+        botSay('🎉 ตอนนี้มีโปรส่งฟรีเมื่อยอดครบ ฿499 และคูปองลด 5% สำหรับลูกค้าใหม่ (โค้ด: <code>PETNEW5</code>)');
+        return;
+      }
+      if(ctx.faq==='ship'){
+        botSay('🚚 จัดส่งภายใน 2–3 วันทำการ ทั่วประเทศ มีเก็บปลายทางได้ค่ะ');
+        return;
+      }
+      if(ctx.faq==='return'){
+        botSay('🔁 คืนสินค้าได้ภายใน 7 วัน หากยังไม่แกะซีล/มีปัญหาจากการขนส่ง ติดต่อแชทนี้ได้เลย');
+        return;
+      }
+
+      // สร้างคะแนนและคัดเลือกสินค้า
+      const scored = PRODUCTS
+        .map(p=>({p, s:scoreProduct(p, ctx)}))
+        .sort((a,b)=>b.s-a.s)
+        .slice(0,3)
+        .map(x=>x.p);
+
+      if(scored.length){
+        let intro = 'นี่คือสินค้าที่เหมาะกับความต้องการของคุณ:';
+        if(ctx.pet) intro = `สำหรับ${ctx.pet}${ctx.maxPrice?` งบไม่เกิน ${baht(ctx.maxPrice)}`:''} แนะนำดังนี้`;
+        botSay(intro, {attachProducts: scored});
+      }else{
+        botSay('ขอข้อมูลเพิ่มอีกนิด เช่น ชนิดสัตว์เลี้ยง / งบประมาณ / ปัญหาที่ต้องการแก้ แล้วฉันจะแนะนำให้ค่ะ');
+      }
+    }
+
+    /***************
+     * Events
+     ***************/
+    function initEvents(){
+      $('#search').addEventListener('input', e=>{ state.search = e.target.value; renderProducts(); });
+      $('#minPrice').addEventListener('input', e=>{ state.minPrice = e.target.value? +e.target.value : null; });
+      $('#maxPrice').addEventListener('input', e=>{ state.maxPrice = e.target.value? +e.target.value : null; });
+      $('#sortBy').addEventListener('change', e=>{ state.sort = e.target.value; renderProducts(); });
+      $('#applyFilters').addEventListener('click', renderProducts);
+      $('#resetFiltersBtn').addEventListener('click', ()=>{
+        state.search=''; $('#search').value='';
+        state.petType='ทั้งหมด'; state.category='ทั้งหมด'; renderChips();
+        state.minPrice=null; state.maxPrice=null; $('#minPrice').value=''; $('#maxPrice').value='';
+        state.sort='featured'; $('#sortBy').value='featured';
+        renderProducts();
+      });
+
+      $('#checkoutBtn').addEventListener('click', ()=>{
+        if(state.cart.length===0){ alert('ตะกร้ายังว่างอยู่'); return; }
+        const items = state.cart.map(i=>`• ${i.name} x${i.qty} = ${baht(i.price*i.qty)}`).join('\n');
+        const sum = state.cart.reduce((t,i)=>t+i.price*i.qty,0);
+        alert(`สรุปคำสั่งซื้อ\n\n${items}\n\nยอดรวม: ${baht(sum)}\n\n*นี่เป็นเดโม ไม่มีการชำระเงินจริง`);
+      });
+
+      $('#clearCart').addEventListener('click', ()=>{ if(confirm('ล้างตะกร้าทั้งหมด?')) clearCart(); });
+      $('#clearCartTop').addEventListener('click', ()=>{ if(confirm('ล้างตะกร้าทั้งหมด?')) clearCart(); });
+
+      // Chat
+      $('#sendBtn').addEventListener('click', ()=>{
+        const text = $('#chatInput').value.trim();
+        if(!text) return;
+        userSay(text);
+        $('#chatInput').value='';
+        setTimeout(()=>reply(text), 200);
+      });
+      $('#chatInput').addEventListener('keydown', e=>{
+        if(e.key==='Enter'){ e.preventDefault(); $('#sendBtn').click(); }
+      });
+      $$('.suggest .chip').forEach(c=>{
+        c.addEventListener('click', ()=>{ $('#chatInput').value = c.dataset.prompt; $('#sendBtn').click(); });
+      });
+    }
+
+    /***************
+     * Boot
+     ***************/
+    function boot(){
+      renderChips();
+      renderProducts();
+      renderCart();
+      initEvents();
+      botSay('สวัสดีค่ะ! ฉันคือผู้ช่วยร้านสัตว์เลี้ยง 🐾 พิมพ์บอกฉันได้เลยว่าคุณเลี้ยงสุนัขหรือแมว งบประมาณ และปัญหาที่อยากแก้ เช่น “แมวแพ้ไก่ งบ 400”');
+    }
+    boot();
+  </script>
+</body>
+</html>
